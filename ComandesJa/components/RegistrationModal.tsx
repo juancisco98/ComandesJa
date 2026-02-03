@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { X, CheckCircle, Loader2 } from 'lucide-react';
+import { X, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import Button from './Button';
+import { supabase } from '../src/lib/supabase';
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -17,7 +18,8 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
     email: '',
     plan: selectedPlan || 'Plan Mensual'
   });
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success'>('idle');
+  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
   // Update plan if prop changes
   useEffect(() => {
@@ -28,24 +30,36 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('submitting');
+    setErrorMessage('');
 
-    // Simulating API Call
-    setTimeout(() => {
+    try {
+      // Insert data into Supabase
+      const { data, error } = await supabase
+        .from('business_registrations')
+        .insert([
+          {
+            owner_name: formData.ownerName,
+            business_name: formData.businessName,
+            category: formData.category,
+            email: formData.email,
+            phone: formData.phone,
+            selected_plan: formData.plan
+          }
+        ])
+        .select();
+
+      if (error) throw error;
+
+      console.log('Registration successful:', data);
       setStatus('success');
-
-      // OPTIONAL: This constructs a mailto link to actually open the user's email client
-      // asking to send the data to you. 
-      // Replace 'tu-email@dominio.com' with your real email.
-      const subject = `Nueva Solicitud de Registro - ${formData.businessName} (${formData.category})`;
-      const body = `¡Hola!\n\nHe rellenado el formulario de registro en ComandesJA y me gustaría unirme a la plataforma.\n\nDATOS DEL NEGOCIO:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n👤 Nombre del Dueño: ${formData.ownerName}\n🏪 Nombre del Local: ${formData.businessName}\n📂 Categoría: ${formData.category}\n📞 Teléfono: ${formData.phone}\n📧 Email: ${formData.email}\n\nPLAN SELECCIONADO:\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n💳 ${formData.plan}\n\nQuedo a la espera de vuestro contacto para activar mi cuenta.\n\nSaludos,\n${formData.ownerName}`;
-
-      // Automatically open email client with pre-filled data
-      window.location.href = `mailto:juan.sada98@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-    }, 1500);
+    } catch (error: any) {
+      console.error('Error submitting registration:', error);
+      setErrorMessage(error.message || 'Hubo un error al enviar tu solicitud. Por favor, inténtalo de nuevo.');
+      setStatus('error');
+    }
   };
 
   return (
@@ -80,6 +94,24 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
               <Button variant="cta" onClick={onClose} className="w-full">
                 Entendido, gracias
               </Button>
+            </div>
+          ) : status === 'error' ? (
+            <div className="text-center py-8">
+              <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <AlertCircle size={40} strokeWidth={3} />
+              </div>
+              <h4 className="font-heading font-bold text-2xl text-gray-800 mb-2">Error al Enviar</h4>
+              <p className="text-gray-600 mb-8">
+                {errorMessage}
+              </p>
+              <div className="space-y-3">
+                <Button variant="cta" onClick={() => setStatus('idle')} className="w-full">
+                  Intentar de Nuevo
+                </Button>
+                <Button variant="secondary" onClick={onClose} className="w-full">
+                  Cerrar
+                </Button>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
