@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { X, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
 import Button from './Button';
 import { supabase } from '../src/lib/supabase';
+import emailjs from '@emailjs/browser';
+
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -36,7 +38,7 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
     setErrorMessage('');
 
     try {
-      // Insert data into Supabase
+      // 1. Insert data into Supabase
       const { data, error } = await supabase
         .from('business_registrations')
         .insert([
@@ -54,6 +56,57 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
       if (error) throw error;
 
       console.log('Registration successful:', data);
+
+      // 2. Send email notification using EmailJS
+      const EMAILJS_SERVICE_ID = 'service_bjbdp1i';
+      const EMAILJS_TEMPLATE_ID = 'template_t9fswcf';
+      const EMAILJS_PUBLIC_KEY = 'rfQWl-IXF8p7I4REu';
+
+      const emailParams = {
+        business_name: formData.businessName,
+        owner_name: formData.ownerName,
+        category: formData.category,
+        email: formData.email,
+        phone: formData.phone,
+        plan: formData.plan,
+        to_email: 'juan.sada98@gmail.com'
+      };
+
+      try {
+        console.log('📧 EmailJS Configuration:', {
+          serviceId: EMAILJS_SERVICE_ID,
+          templateId: EMAILJS_TEMPLATE_ID,
+          publicKey: EMAILJS_PUBLIC_KEY.substring(0, 8) + '...'
+        });
+
+        console.log('📤 Sending email with params:', emailParams);
+
+
+        const emailResponse = await emailjs.send(
+          EMAILJS_SERVICE_ID,
+          EMAILJS_TEMPLATE_ID,
+          emailParams,
+          EMAILJS_PUBLIC_KEY
+        );
+
+        console.log('✅ Email sent successfully!', emailResponse);
+        console.log('📬 Email should arrive at: juan.sada98@gmail.com');
+      } catch (emailError: any) {
+        console.error('❌ EmailJS Error:', emailError);
+        console.error('📋 Full error details:', {
+          message: emailError.message || 'No message',
+          text: emailError.text || 'No text',
+          status: emailError.status || 'No status',
+          name: emailError.name || 'No name'
+        });
+        console.error('🔍 Troubleshooting steps:');
+        console.error('1. Check EmailJS Dashboard: https://dashboard.emailjs.com/admin');
+        console.error('2. Verify Service ID is active');
+        console.error('3. Verify Template ID exists');
+        console.error('4. Check template parameters match:', Object.keys(emailParams));
+        // Don't fail the registration if email fails
+      }
+
       setStatus('success');
     } catch (error: any) {
       console.error('Error submitting registration:', error);
