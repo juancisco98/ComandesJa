@@ -151,6 +151,48 @@ const RegistrationDetail: React.FC<RegistrationDetailProps> = ({ registration, o
                             </select>
                         </div>
 
+                        {/* Plan Expiration - Only for Approved */}
+                        {status === 'approved' && (
+                            <div className="border-t border-gray-200 pt-4 animate-fadeIn">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-2">
+                                    Vencimiento del Plan
+                                </label>
+                                <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex justify-between items-center">
+                                    <div>
+                                        <p className="text-sm text-green-800 font-semibold">
+                                            {registration.plan_contratado}
+                                        </p>
+                                        <p className="text-xs text-green-600 mt-1">
+                                            Calculado desde la fecha de aprobación
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-2xl font-bold text-green-700">
+                                            {(() => {
+                                                const startDate = new Date(registration.updated_at || registration.created_at || Date.now());
+                                                const endDate = new Date(startDate);
+
+                                                if (registration.plan_contratado === 'Plan Mensual') {
+                                                    endDate.setMonth(endDate.getMonth() + 1);
+                                                } else if (registration.plan_contratado === 'Plan Semestral') {
+                                                    endDate.setMonth(endDate.getMonth() + 6);
+                                                } else if (registration.plan_contratado === 'Plan Anual') {
+                                                    endDate.setFullYear(endDate.getFullYear() + 1);
+                                                }
+
+                                                return endDate.toLocaleDateString('es-ES', {
+                                                    day: '2-digit',
+                                                    month: 'long',
+                                                    year: 'numeric'
+                                                });
+                                            })()}
+                                        </p>
+                                        <p className="text-xs text-green-600 font-medium">Fecha de Renovación</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Notes */}
                         <div>
                             <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-2">
