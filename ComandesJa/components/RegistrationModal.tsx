@@ -39,91 +39,25 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
     setErrorMessage('');
 
     try {
-      // 1. Create user in Supabase Auth
+      // 1. Crear usuario en Supabase Auth con metadata
+      // NO USAR .from('business_registrations').insert(...)
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           data: {
+            nombre_local: formData.businessName,
+            categoria: formData.category,
+            telefono: formData.phone,
+            plan: formData.plan,
+            // Additional standard fields
             full_name: formData.ownerName,
-            phone: formData.phone,
-            business_name: formData.businessName,
-            role: 'owner' // Assign role if you use RBAC
+            role: 'owner'
           }
         }
       });
 
       if (authError) throw authError;
-
-      // 2. Insert data into Supabase (business_registrations table)
-      // Note: If you want to link the registration to the auth user, you might want to add user_id here
-      // but for now we keep it compatible with existing schema
-      const { data, error } = await supabase
-        .from('business_registrations')
-        .insert([
-          {
-            owner_name: formData.ownerName,
-            business_name: formData.businessName,
-            category: formData.category,
-            email: formData.email,
-            phone: formData.phone,
-            selected_plan: formData.plan
-          }
-        ])
-        .select();
-
-      if (error) throw error;
-
-      console.log('Registration successful:', data);
-
-      // 3. Send email notification using EmailJS
-      const EMAILJS_SERVICE_ID = 'service_bjbdp1i';
-      const EMAILJS_TEMPLATE_ID = 'template_t9fswcf';
-      const EMAILJS_PUBLIC_KEY = 'rfQWl-IXF8p7I4REu';
-
-      const emailParams = {
-        business_name: formData.businessName,
-        owner_name: formData.ownerName,
-        category: formData.category,
-        email: formData.email,
-        phone: formData.phone,
-        plan: formData.plan,
-        to_email: 'juan.sada98@gmail.com'
-      };
-
-      try {
-        console.log('📧 EmailJS Configuration:', {
-          serviceId: EMAILJS_SERVICE_ID,
-          templateId: EMAILJS_TEMPLATE_ID,
-          publicKey: EMAILJS_PUBLIC_KEY.substring(0, 8) + '...'
-        });
-
-        console.log('📤 Sending email with params:', emailParams);
-
-        const emailResponse = await emailjs.send(
-          EMAILJS_SERVICE_ID,
-          EMAILJS_TEMPLATE_ID,
-          emailParams,
-          EMAILJS_PUBLIC_KEY
-        );
-
-        console.log('✅ Email sent successfully!', emailResponse);
-        console.log('📬 Email should arrive at: juan.sada98@gmail.com');
-      } catch (emailError: any) {
-        console.error('❌ EmailJS Error:', emailError);
-        console.error('📋 Full error details:', {
-          message: emailError.message || 'No message',
-          text: emailError.text || 'No text',
-          status: emailError.status || 'No status',
-          name: emailError.name || 'No name'
-        });
-        console.error('🔍 Troubleshooting steps:');
-        console.error('1. Check EmailJS Dashboard: https://dashboard.emailjs.com/admin');
-        console.error('2. Verify Service ID is active');
-        console.error('3. Verify Template ID exists');
-        console.error('4. Check template parameters match:', Object.keys(emailParams));
-        // Don't fail the registration if email fails
-      }
 
       setStatus('success');
     } catch (error: any) {
@@ -131,6 +65,10 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
       // Nice error message for existing user
       if (error.message?.includes('User already registered') || error.message?.includes('already registered')) {
         setErrorMessage('Este correo electrónico ya está registrado. Por favor intenta iniciar sesión.');
+      } else if (error.message?.includes('rate limit')) {
+        setErrorMessage('Has intentado registrarte muchas veces. Por favor espera unos minutos antes de intentar de nuevo.');
+      } else if (error.message?.includes('is invalid')) {
+        setErrorMessage('El correo electrónico no es válido. Supabase verifica que tenga el formato correcto y que el dominio exista.');
       } else {
         setErrorMessage(error.message || 'Hubo un error al enviar tu solicitud. Por favor, inténtalo de nuevo.');
       }

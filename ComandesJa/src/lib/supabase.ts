@@ -11,13 +11,14 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Type definition for business registration
 export interface BusinessRegistration {
-    id?: string
-    owner_name: string
-    business_name: string
-    category: string
-    email: string
-    phone: string
-    selected_plan: string
+    id: string
+    owner_id?: string
+    nombre_local: string
+    categoria: string
+    telefono: string
+    plan_contratado: string
+    email?: string
+    owner_name?: string
     status?: 'pending' | 'contacted' | 'approved' | 'rejected'
     created_at?: string
     updated_at?: string

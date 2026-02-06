@@ -11,11 +11,13 @@ import DemoView from './components/DemoView';
 import Dashboard from './components/Dashboard';
 import RegistrationModal from './components/RegistrationModal';
 import AdminLogin from './components/AdminLogin';
+
 import AdminDashboard from './components/AdminDashboard';
+import UpdatePassword from './components/UpdatePassword';
 import { getSession } from './src/lib/supabase';
 
 const App: React.FC = () => {
-  const [view, setView] = useState<'landing' | 'demo' | 'dashboard' | 'admin'>('landing');
+  const [view, setView] = useState<'landing' | 'demo' | 'dashboard' | 'admin' | 'update-password'>('landing');
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('Plan Mensual');
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
@@ -26,9 +28,13 @@ const App: React.FC = () => {
     const hash = window.location.hash;
 
     // Check if this is an OAuth callback (has hash with access_token)
+    // Check if this is an OAuth callback (has hash with access_token)
     if (hash && hash.includes('access_token')) {
       console.log('OAuth callback detected, checking session...');
       checkAdminAuth();
+    } else if (hash && hash.includes('type=recovery')) {
+      console.log('Password recovery detected');
+      setView('update-password');
     } else if (path === '/admin') {
       checkAdminAuth();
     }
@@ -91,6 +97,10 @@ const App: React.FC = () => {
 
   if (view === 'dashboard') {
     return <Dashboard onLogout={() => setView('landing')} />;
+  }
+
+  if (view === 'update-password') {
+    return <UpdatePassword onSuccess={() => setView('admin')} />;
   }
 
   return (

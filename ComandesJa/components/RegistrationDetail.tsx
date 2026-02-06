@@ -21,11 +21,12 @@ const RegistrationDetail: React.FC<RegistrationDetailProps> = ({ registration, o
 
         try {
             const { error } = await supabase
-                .from('business_registrations')
+                .from('locales')
                 .update({
                     status,
                     notes,
-                    updated_at: new Date().toISOString()
+                    // updated_at is usually handled by triggers or we can set it here if column exists
+                    // updated_at: new Date().toISOString() 
                 })
                 .eq('id', registration.id);
 
@@ -57,9 +58,9 @@ const RegistrationDetail: React.FC<RegistrationDetailProps> = ({ registration, o
                 <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-gradient-to-r from-primary/5 to-green-50">
                     <div>
                         <h3 className="font-heading font-bold text-2xl text-gray-800">
-                            {registration.business_name}
+                            {registration.nombre_local}
                         </h3>
-                        <p className="text-sm text-gray-600 mt-1">{registration.category}</p>
+                        <p className="text-sm text-gray-600 mt-1">{registration.categoria}</p>
                     </div>
                     <button
                         onClick={onClose}
@@ -96,13 +97,13 @@ const RegistrationDetail: React.FC<RegistrationDetailProps> = ({ registration, o
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Teléfono
                                 </label>
-                                <p className="text-gray-800 font-semibold mt-1">{registration.phone}</p>
+                                <p className="text-gray-800 font-semibold mt-1">{registration.telefono}</p>
                             </div>
                             <div>
                                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                                     Plan Seleccionado
                                 </label>
-                                <p className="text-gray-800 font-semibold mt-1">{registration.selected_plan}</p>
+                                <p className="text-gray-800 font-semibold mt-1">{registration.plan_contratado}</p>
                             </div>
                         </div>
 

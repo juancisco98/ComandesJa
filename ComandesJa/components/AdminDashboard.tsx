@@ -33,7 +33,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
         setLoading(true);
         try {
             const { data, error } = await supabase
-                .from('business_registrations')
+                .from('locales')
                 .select('*')
                 .order('created_at', { ascending: false });
 
@@ -73,10 +73,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
                     <div className="flex justify-between items-center">
                         <div>
                             <h1 className="font-heading font-bold text-2xl text-gray-800">
-                                Panel de Administración
+                                Panel de Control - Creador
                             </h1>
                             <p className="text-sm text-gray-600">
-                                {user?.email}
+                                Gestión Global del Sistema
                             </p>
                         </div>
                         <Button

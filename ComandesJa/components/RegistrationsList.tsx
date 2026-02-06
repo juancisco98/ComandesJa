@@ -116,18 +116,18 @@ const RegistrationsList: React.FC<RegistrationsListProps> = ({ registrations, on
                                         onClick={() => setSelectedRegistration(registration)}
                                     >
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="font-semibold text-gray-800">{registration.business_name}</div>
+                                            <div className="font-semibold text-gray-800">{registration.nombre_local}</div>
                                             <div className="text-sm text-gray-500">{registration.email}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-gray-800">{registration.owner_name}</div>
-                                            <div className="text-sm text-gray-500">{registration.phone}</div>
+                                            <div className="text-sm text-gray-500">{registration.telefono}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-gray-800">
-                                            {registration.category}
+                                            {registration.categoria}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-gray-800">
-                                            {registration.selected_plan}
+                                            {registration.plan_contratado}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {getStatusBadge(registration.status)}

