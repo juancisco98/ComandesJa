@@ -226,6 +226,8 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
                   <option value="Restaurante">🍔 Restaurante / Comida</option>
                   <option value="Bar">🍺 Bar / Pub</option>
                   <option value="Cafetería">☕ Cafetería / Panadería</option>
+                  <option value="Carnicería">🥩 Carnicería</option>
+                  <option value="Fiambrería">🥓 Fiambrería</option>
                 </select>
               </div>
 
