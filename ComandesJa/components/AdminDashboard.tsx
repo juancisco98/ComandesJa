@@ -115,9 +115,24 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, isDemo = fals
         onLogout();
     };
 
-    const handleRegistrationUpdate = () => {
-        // Reload registrations after update
-        loadRegistrations();
+    const handleRegistrationUpdate = (updatedRegistration?: BusinessRegistration) => {
+        if (isDemo && updatedRegistration) {
+            setRegistrations(prev => {
+                const updatedList = prev.map(r => r.id === updatedRegistration.id ? updatedRegistration : r);
+
+                // Recalculate stats immediately for better UX
+                const total = updatedList.length;
+                const pending = updatedList.filter(r => r.status === 'pending').length;
+                const contacted = updatedList.filter(r => r.status === 'contacted').length;
+                const approved = updatedList.filter(r => r.status === 'approved').length;
+                setStats({ total, pending, contacted, approved });
+
+                return updatedList;
+            });
+        } else {
+            // Normal behavior: Reload from DB
+            loadRegistrations();
+        }
     };
 
     return (

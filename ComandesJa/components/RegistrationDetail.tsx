@@ -6,7 +6,7 @@ import { supabase, BusinessRegistration } from '../src/lib/supabase';
 interface RegistrationDetailProps {
     registration: BusinessRegistration;
     onClose: () => void;
-    onUpdate: () => void;
+    onUpdate: (updatedRegistration?: BusinessRegistration) => void;
     isDemo?: boolean;
 }
 
@@ -23,7 +23,13 @@ const RegistrationDetail: React.FC<RegistrationDetailProps> = ({ registration, o
         // Simulate save in demo mode
         if (isDemo) {
             setTimeout(() => {
-                onUpdate();
+                const updatedRegistration = {
+                    ...registration,
+                    status: status as any,
+                    notes,
+                    updated_at: new Date().toISOString()
+                };
+                onUpdate(updatedRegistration);
                 setSaving(false);
             }, 1000);
             return;
