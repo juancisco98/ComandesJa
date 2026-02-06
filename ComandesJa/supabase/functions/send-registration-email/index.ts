@@ -4,36 +4,36 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 
 const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
 interface Registration {
-    id: string
-    owner_name: string
-    business_name: string
-    category: string
-    email: string
-    phone: string
-    selected_plan: string
-    created_at: string
+  id: string
+  owner_name: string
+  business_name: string
+  category: string
+  email: string
+  phone: string
+  selected_plan: string
+  created_at: string
 }
 
 serve(async (req) => {
-    // Handle CORS preflight requests
-    if (req.method === 'OPTIONS') {
-        return new Response('ok', { headers: corsHeaders })
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
+  try {
+    const { registration } = await req.json() as { registration: Registration }
+
+    if (!RESEND_API_KEY) {
+      throw new Error('RESEND_API_KEY is not set')
     }
 
-    try {
-        const { registration } = await req.json() as { registration: Registration }
-
-        if (!RESEND_API_KEY) {
-            throw new Error('RESEND_API_KEY is not set')
-        }
-
-        // Format the email HTML
-        const emailHtml = `
+    // Format the email HTML
+    const emailHtml = `
       <!DOCTYPE html>
       <html>
         <head>
@@ -126,12 +126,12 @@ serve(async (req) => {
             <div class="info-row" style="border-bottom: none;">
               <span class="info-label">📅 Fecha:</span>
               <span class="info-value">${new Date(registration.created_at).toLocaleString('es-ES', {
-            day: '2-digit',
-            month: 'long',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        })}</span>
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    })}</span>
             </div>
             
             <div style="margin-top: 20px;">
@@ -154,42 +154,42 @@ serve(async (req) => {
       </html>
     `
 
-        // Send email via Resend
-        const res = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${RESEND_API_KEY}`
-            },
-            body: JSON.stringify({
-                from: 'ComandesJA <onboarding@resend.dev>',
-                to: ['juan.sada98@gmail.com'],
-                subject: `🎉 Nueva Solicitud: ${registration.business_name} (${registration.category})`,
-                html: emailHtml
-            })
-        })
+    // Send email via Resend
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${RESEND_API_KEY}`
+      },
+      body: JSON.stringify({
+        from: 'ComandesJA <onboarding@resend.dev>',
+        to: ['juan.sada98@gmail.com'],
+        subject: `🎉 Nueva Solicitud: ${registration.business_name} (${registration.category})`,
+        html: emailHtml
+      })
+    })
 
-        const data = await res.json()
+    const data = await res.json()
 
-        if (!res.ok) {
-            throw new Error(`Resend API error: ${JSON.stringify(data)}`)
-        }
-
-        return new Response(
-            JSON.stringify({ success: true, data }),
-            {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 200
-            }
-        )
-    } catch (error) {
-        console.error('Error sending email:', error)
-        return new Response(
-            JSON.stringify({ success: false, error: error.message }),
-            {
-                headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-                status: 500
-            }
-        )
+    if (!res.ok) {
+      throw new Error(`Resend API error: ${JSON.stringify(data)}`)
     }
+
+    return new Response(
+      JSON.stringify({ success: true, data }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200
+      }
+    )
+  } catch (error) {
+    console.error('Error sending email:', error)
+    return new Response(
+      JSON.stringify({ success: false, error: error.message }),
+      {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500
+      }
+    )
+  }
 })

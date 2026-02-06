@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, CheckCircle, Loader2, AlertCircle } from 'lucide-react';
+import { X, CheckCircle, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import Button from './Button';
 import { supabase } from '../src/lib/supabase';
 import emailjs from '@emailjs/browser';
-
 
 interface RegistrationModalProps {
   isOpen: boolean;
@@ -18,10 +17,12 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
     category: 'Restaurante', // Default category
     phone: '',
     email: '',
+    password: '',
     plan: selectedPlan || 'Plan Mensual'
   });
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   // Update plan if prop changes
   useEffect(() => {
@@ -38,7 +39,25 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
     setErrorMessage('');
 
     try {
-      // 1. Insert data into Supabase
+      // 1. Create user in Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.ownerName,
+            phone: formData.phone,
+            business_name: formData.businessName,
+            role: 'owner' // Assign role if you use RBAC
+          }
+        }
+      });
+
+      if (authError) throw authError;
+
+      // 2. Insert data into Supabase (business_registrations table)
+      // Note: If you want to link the registration to the auth user, you might want to add user_id here
+      // but for now we keep it compatible with existing schema
       const { data, error } = await supabase
         .from('business_registrations')
         .insert([
@@ -57,7 +76,7 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
 
       console.log('Registration successful:', data);
 
-      // 2. Send email notification using EmailJS
+      // 3. Send email notification using EmailJS
       const EMAILJS_SERVICE_ID = 'service_bjbdp1i';
       const EMAILJS_TEMPLATE_ID = 'template_t9fswcf';
       const EMAILJS_PUBLIC_KEY = 'rfQWl-IXF8p7I4REu';
@@ -80,7 +99,6 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
         });
 
         console.log('📤 Sending email with params:', emailParams);
-
 
         const emailResponse = await emailjs.send(
           EMAILJS_SERVICE_ID,
@@ -110,7 +128,12 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
       setStatus('success');
     } catch (error: any) {
       console.error('Error submitting registration:', error);
-      setErrorMessage(error.message || 'Hubo un error al enviar tu solicitud. Por favor, inténtalo de nuevo.');
+      // Nice error message for existing user
+      if (error.message?.includes('User already registered') || error.message?.includes('already registered')) {
+        setErrorMessage('Este correo electrónico ya está registrado. Por favor intenta iniciar sesión.');
+      } else {
+        setErrorMessage(error.message || 'Hubo un error al enviar tu solicitud. Por favor, inténtalo de nuevo.');
+      }
       setStatus('error');
     }
   };
@@ -142,7 +165,7 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
               </div>
               <h4 className="font-heading font-bold text-2xl text-gray-800 mb-2">¡Solicitud Enviada!</h4>
               <p className="text-gray-600 mb-8">
-                Hemos recibido tus datos correctamente. Nos pondremos en contacto contigo al <strong>{formData.phone}</strong> en breve para activar tu cuenta como <strong>{formData.category}</strong>.
+                Hemos recibido tus datos correctamente. Tu cuenta ha sido creada. Nos pondremos en contacto contigo al <strong>{formData.phone}</strong>.
               </p>
               <Button variant="cta" onClick={onClose} className="w-full">
                 Entendido, gracias
@@ -201,14 +224,8 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
                   onChange={e => setFormData({ ...formData, category: e.target.value })}
                 >
                   <option value="Restaurante">🍔 Restaurante / Comida</option>
-                  <option value="Cafetería">☕ Cafetería / Panadería</option>
                   <option value="Bar">🍺 Bar / Pub</option>
-                  <option value="Farmacia">💊 Farmacia</option>
-                  <option value="Supermercado">🛒 Supermercado / Tienda</option>
-                  <option value="Tabaquería">🚬 Tabaquería</option>
-                  <option value="Ropa">👗 Tienda de Ropa</option>
-                  <option value="Servicios">💇‍♂️ Peluquería / Servicios</option>
-                  <option value="Otro">✨ Otro</option>
+                  <option value="Cafetería">☕ Cafetería / Panadería</option>
                 </select>
               </div>
 
@@ -250,6 +267,28 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
                 />
               </div>
 
+              <div>
+                <label className="block text-sm font-bold text-gray-700 mb-1 ml-1">Contraseña</label>
+                <div className="relative">
+                  <input
+                    required
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    className="w-full px-4 py-3 rounded-xl bg-white border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all pr-12"
+                    value={formData.password}
+                    onChange={e => setFormData({ ...formData, password: e.target.value })}
+                    minLength={6}
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
+                </div>
+              </div>
+
               <div className="pt-4">
                 <Button
                   type="submit"
@@ -258,7 +297,7 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
                   disabled={status === 'submitting'}
                 >
                   {status === 'submitting' ? (
-                    <><Loader2 className="animate-spin" /> Enviando...</>
+                    <><Loader2 className="animate-spin" /> Registrando...</>
                   ) : (
                     'Enviar Solicitud'
                   )}
