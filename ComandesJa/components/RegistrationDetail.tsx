@@ -7,9 +7,10 @@ interface RegistrationDetailProps {
     registration: BusinessRegistration;
     onClose: () => void;
     onUpdate: () => void;
+    isDemo?: boolean;
 }
 
-const RegistrationDetail: React.FC<RegistrationDetailProps> = ({ registration, onClose, onUpdate }) => {
+const RegistrationDetail: React.FC<RegistrationDetailProps> = ({ registration, onClose, onUpdate, isDemo = false }) => {
     const [status, setStatus] = useState(registration.status || 'pending');
     const [notes, setNotes] = useState(registration.notes || '');
     const [saving, setSaving] = useState(false);
@@ -18,6 +19,15 @@ const RegistrationDetail: React.FC<RegistrationDetailProps> = ({ registration, o
     const handleSave = async () => {
         setSaving(true);
         setError('');
+
+        // Simulate save in demo mode
+        if (isDemo) {
+            setTimeout(() => {
+                onUpdate();
+                setSaving(false);
+            }, 1000);
+            return;
+        }
 
         try {
             const { error } = await supabase

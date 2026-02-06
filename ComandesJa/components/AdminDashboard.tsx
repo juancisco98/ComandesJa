@@ -214,6 +214,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, isDemo = fals
                     <RegistrationsList
                         registrations={registrations}
                         onUpdate={handleRegistrationUpdate}
+                        isDemo={isDemo}
                     />
                 )}
             </main>

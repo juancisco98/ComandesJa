@@ -6,9 +6,10 @@ import { BusinessRegistration } from '../src/lib/supabase';
 interface RegistrationsListProps {
     registrations: BusinessRegistration[];
     onUpdate: () => void;
+    isDemo?: boolean;
 }
 
-const RegistrationsList: React.FC<RegistrationsListProps> = ({ registrations, onUpdate }) => {
+const RegistrationsList: React.FC<RegistrationsListProps> = ({ registrations, onUpdate, isDemo = false }) => {
     const [selectedRegistration, setSelectedRegistration] = useState<BusinessRegistration | null>(null);
     const [filterStatus, setFilterStatus] = useState<string>('all');
 
@@ -164,6 +165,7 @@ const RegistrationsList: React.FC<RegistrationsListProps> = ({ registrations, on
                         setSelectedRegistration(null);
                         onUpdate();
                     }}
+                    isDemo={isDemo}
                 />
             )}
         </>
