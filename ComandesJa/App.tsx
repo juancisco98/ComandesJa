@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
+import ComparisonSection from './components/ComparisonSection';
 import Features from './components/Features';
 import Pricing from './components/Pricing';
 import Testimonials from './components/Testimonials';
@@ -103,6 +104,8 @@ const App: React.FC = () => {
           onRegister={() => handleRegister()}
         />
         <Features />
+
+        <ComparisonSection />
 
         {/* Divider with unique shape */}
         <div className="w-full h-24 bg-gradient-to-b from-transparent to-primary/5 rounded-b-[50%] scale-x-150 origin-top"></div>
