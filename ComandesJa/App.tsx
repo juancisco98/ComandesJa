@@ -21,6 +21,7 @@ const App: React.FC = () => {
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState('Plan Mensual');
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [isDemoAdmin, setIsDemoAdmin] = useState(false);
 
   // Check for admin route on mount
   useEffect(() => {
@@ -45,6 +46,7 @@ const App: React.FC = () => {
     const { session } = await getSession();
     if (session?.user?.email === 'juan.sada98@gmail.com') {
       setIsAdminAuthenticated(true);
+      setIsDemoAdmin(false);
       // Clean up the URL hash
       window.history.replaceState({}, document.title, '/admin');
     } else {
@@ -52,8 +54,9 @@ const App: React.FC = () => {
     }
   };
 
-  const handleAdminLogin = () => {
+  const handleAdminLogin = (isDemo: boolean = false) => {
     setIsAdminAuthenticated(true);
+    setIsDemoAdmin(isDemo);
   };
 
   const handleAdminLogout = () => {
@@ -85,7 +88,7 @@ const App: React.FC = () => {
   // Admin view
   if (view === 'admin') {
     if (isAdminAuthenticated) {
-      return <AdminDashboard onLogout={handleAdminLogout} />;
+      return <AdminDashboard onLogout={handleAdminLogout} isDemo={isDemoAdmin} />;
     } else {
       return <AdminLogin onLoginSuccess={handleAdminLogin} />;
     }

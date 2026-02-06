@@ -6,9 +6,10 @@ import { getCurrentUser, signOut, supabase, BusinessRegistration } from '../src/
 
 interface AdminDashboardProps {
     onLogout: () => void;
+    isDemo?: boolean;
 }
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, isDemo = false }) => {
     const [user, setUser] = useState<any>(null);
     const [registrations, setRegistrations] = useState<BusinessRegistration[]>([]);
     const [loading, setLoading] = useState(true);
@@ -20,9 +21,63 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
     });
 
     useEffect(() => {
-        loadUser();
-        loadRegistrations();
-    }, []);
+        if (isDemo) {
+            loadMockData();
+        } else {
+            loadUser();
+            loadRegistrations();
+        }
+    }, [isDemo]);
+
+    const loadMockData = () => {
+        setLoading(true);
+        // Datos de ejemplo para el modo demo
+        const mockData: BusinessRegistration[] = [
+            {
+                id: '1',
+                nombre_local: 'Burger Town',
+                email: 'contacto@burgertown.com',
+                owner_name: 'Carlos Ruiz',
+                telefono: '600 123 456',
+                categoria: 'Restaurante',
+                plan_contratado: 'Plan Mensual',
+                status: 'pending',
+                created_at: new Date().toISOString()
+            },
+            {
+                id: '2',
+                nombre_local: 'Café Central',
+                email: 'hola@cafecentral.es',
+                owner_name: 'Ana Gómez',
+                telefono: '600 987 654',
+                categoria: 'Cafetería',
+                plan_contratado: 'Plan Anual',
+                status: 'contacted',
+                created_at: new Date(Date.now() - 86400000).toISOString()
+            },
+            {
+                id: '3',
+                nombre_local: 'La Pizzería',
+                email: 'info@lapizzeria.com',
+                owner_name: 'Mario Rossi',
+                telefono: '600 555 555',
+                categoria: 'Restaurante',
+                plan_contratado: 'Plan Semestral',
+                status: 'approved',
+                created_at: new Date(Date.now() - 172800000).toISOString()
+            }
+        ];
+
+        setRegistrations(mockData);
+        setStats({
+            total: 3,
+            pending: 1,
+            contacted: 1,
+            approved: 1
+        });
+        setUser({ email: 'juan.sada98@gmail.com (Demo)' });
+        setLoading(false);
+    };
 
     const loadUser = async () => {
         const { user } = await getCurrentUser();
@@ -70,6 +125,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout }) => {
             {/* Header */}
             <header className="bg-white/80 backdrop-blur-xl border-b border-white/50 sticky top-0 z-40 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                    {isDemo && (
+                        <div className="mb-4 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded shadow-sm" role="alert">
+                            <p className="font-bold">Modo Demo Activo</p>
+                            <p>Estás viendo datos de ejemplo simulados. Los cambios no se guardarán en la base de datos real.</p>
+                        </div>
+                    )}
                     <div className="flex justify-between items-center">
                         <div>
                             <h1 className="font-heading font-bold text-2xl text-gray-800">

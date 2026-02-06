@@ -4,7 +4,7 @@ import Button from './Button';
 import { supabase, getSession } from '../src/lib/supabase';
 
 interface AdminLoginProps {
-    onLoginSuccess: () => void;
+    onLoginSuccess: (isDemo?: boolean) => void;
 }
 
 const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
@@ -47,7 +47,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
 
         // Backdoor for demo/testing as requested
         if (email === 'juan.sada98@gmail.com' && password === '0000') {
-            onLoginSuccess();
+            onLoginSuccess(true);
             return;
         }
 

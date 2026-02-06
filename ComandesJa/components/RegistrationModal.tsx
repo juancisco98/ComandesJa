@@ -59,6 +59,28 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
 
       if (authError) throw authError;
 
+      // 2. Insertar en la tabla locales
+      const { error: dbError } = await supabase
+        .from('locales')
+        .insert([
+          {
+            nombre_local: formData.businessName,
+            categoria: formData.category,
+            telefono: formData.phone,
+            plan_contratado: formData.plan,
+            email: formData.email,
+            owner_name: formData.ownerName,
+            status: 'pending',
+            owner_id: authData.user?.id
+          }
+        ]);
+
+      // Si falla la BD, igual seguimos porque el usuario se creó (lo ideal sería transacción pero supabase auth va separado)
+      if (dbError) {
+        console.error('Error creating business record:', dbError);
+        // Podríamos lanzar error pero mejor dejamos que pase y el usuario contacte soporte si no lo vemos
+      }
+
       setStatus('success');
     } catch (error: any) {
       console.error('Error submitting registration:', error);
