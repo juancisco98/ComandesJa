@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { X, CheckCircle, Loader2, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import Button from './Button';
 import { supabase } from '../src/lib/supabase';
-import emailjs from '@emailjs/browser';
 
 interface RegistrationModalProps {
   isOpen: boolean;
