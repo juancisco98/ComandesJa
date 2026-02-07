@@ -1,0 +1,271 @@
+/* Global Soft UI Styles */
+
+body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* PRINT STYLES - CRITICAL FOR SHIFT CLOSE */
+@media print {
+    @page {
+        size: auto;
+        margin: 0mm;
+    }
+
+    body {
+        background: white;
+        margin: 0;
+        padding: 0;
+    }
+
+    body * {
+        visibility: hidden;
+    }
+
+    /* Hide the main App Root (since receipt is now in Portal outside root) */
+    #root {
+        display: none !important;
+    }
+
+    /* Hide the main UI wrapper explicitly */
+    .no-print,
+    .no-print * {
+        display: none !important;
+    }
+
+    /* TARGET THE PRINT ID container (nested directly in body via Portal) */
+    #thermal-receipt {
+        visibility: visible !important;
+        display: block !important;
+    }
+
+    #thermal-receipt {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        padding: 2rem;
+        background-color: white !important;
+        color: black !important;
+        z-index: 99999;
+        overflow: visible;
+    }
+
+    /* Ensure flexbox/grid works inside the receipt if needed */
+    #thermal-receipt .print-grid {
+        display: grid !important;
+    }
+
+    #thermal-receipt .print-flex {
+        display: flex !important;
+    }
+}
+
+
+/* --- ANIMATION UTILITIES (Custom Polyfill for tailwindcss-animate) --- */
+
+/* Base Logic */
+.animate-in {
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    animation-fill-mode: forwards;
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes slideInFromTop2 {
+    from {
+        transform: translateY(-0.5rem);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromBottom2 {
+    from {
+        transform: translateY(0.5rem);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromBottom10 {
+    from {
+        transform: translateY(2.5rem);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Utility Classes Mapping */
+.fade-in {
+    animation-name: fadeIn;
+}
+
+.zoom-in {
+    animation-name: zoomIn;
+}
+
+.slide-in-from-top-2 {
+    animation-name: slideInFromTop2;
+}
+
+.slide-in-from-top-4 {
+    animation-name: slideInFromTop2;
+}
+
+/* Reuse small slide */
+.slide-in-from-bottom-2 {
+    animation-name: slideInFromBottom2;
+}
+
+.slide-in-from-bottom-10 {
+    animation-name: slideInFromBottom10;
+}
+
+.slide-in-from-right {
+    animation-name: slideInFromRight;
+}
+
+
+/* --- LEGACY / EXPLICIT UTILS --- */
+.animate-fade-in {
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-scale-in {
+    animation: zoomIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+
+/* Delays */
+.delay-100 {
+    animation-delay: 100ms;
+}
+
+.delay-200 {
+    animation-delay: 200ms;
+}
+
+.delay-300 {
+    animation-delay: 300ms;
+}
+
+.delay-500 {
+    animation-delay: 500ms;
+}
+
+/* Interactive Elements */
+.btn-press {
+    transition: transform 0.1s ease;
+}
+
+.btn-press:active {
+    transform: scale(0.95) !important;
+}
+
+.hover-lift {
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+/* Glassmorphism Utilities */
+.glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.glass-dark {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Card Styles */
+.soft-card {
+    background: white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    border-radius: 1rem;
+    /* rounded-2xl */
+    border: 1px solid rgba(229, 231, 235, 0.5);
+    /* gray-200/50 */
+    transition: all 0.2s ease;
+    /* Ensure opacity is 1 for non-animated cards */
+}
+
+.soft-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
