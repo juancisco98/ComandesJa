@@ -24,6 +24,7 @@ export interface User {
   role: UserRole;
   storeSlug?: string; // Solo para tenants
   businessType?: BusinessType; // Nuevo: Para adaptar la UI
+  isApproved?: boolean; // Nuevo: Para controlar acceso
 }
 
 // Marketplace Stores

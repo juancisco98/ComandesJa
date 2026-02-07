@@ -17,6 +17,8 @@ import SettingsView from './components/SettingsView';
 import AnalyticsView from './components/AnalyticsView';
 import { UserRole } from './types';
 
+import PendingApprovalView from './components/PendingApprovalView';
+
 // Componente para proteger rutas y redirigir según rol
 const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: UserRole[] }> = ({ children, allowedRoles }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -31,6 +33,11 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: UserR
 
   if (!isAuthenticated || !user) {
     return <Navigate to="/login" replace />;
+  }
+
+  // CHECK APPROVAL STATUS FOR TENANTS
+  if (user.role === 'TENANT' && user.isApproved === false) {
+    return <Navigate to="/pending-approval" replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
@@ -49,6 +56,13 @@ const AppRoutes = () => {
   return (
     <Routes>
       <Route path="/login" element={user ? <Navigate to={user.role === 'TENANT' ? "/admin/kitchen" : "/store"} replace /> : <LoginView />} />
+
+      {/* PENDING APPROVAL ROUTE */}
+      <Route path="/pending-approval" element={
+        user?.role === 'TENANT' && user?.isApproved === false
+          ? <PendingApprovalView />
+          : <Navigate to="/login" />
+      } />
 
       {/* Customer Routes (Marketplace & Stores) */}
       <Route path="/store" element={

@@ -52,7 +52,7 @@ const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, onClose, 
             plan: formData.plan,
             // Additional standard fields
             full_name: formData.ownerName,
-            role: 'owner'
+            role: 'TENANT'
           }
         }
       });

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '../types';
 import { authService } from '../services/authService';
+import { supabase } from '../services/supabase';
 
 interface AuthContextType {
   user: User | null;
@@ -23,6 +24,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const checkSession = async () => {
       const currentUser = await authService.getCurrentUser();
       if (currentUser) {
+        // FETCH APPROVAL STATUS
+        if (currentUser.role === 'TENANT') {
+          const { data: localeData } = await supabase
+            .from('locales')
+            .select('status')
+            .eq('owner_id', currentUser.id)
+            .single();
+
+          currentUser.isApproved = localeData?.status === 'approved';
+        } else {
+          currentUser.isApproved = true;
+        }
         setUser(currentUser);
       }
       setIsLoading(false);
@@ -34,10 +47,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("Auth state change:", event);
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         if (session?.user) {
-           // We need to map the session user to our User type.
-           // Ideally we reuse a mapping function, but for now we can fetch current user to ensure full metadata
-           const currentUser = await authService.getCurrentUser();
-           setUser(currentUser);
+          const currentUser = await authService.getCurrentUser();
+
+          // FETCH APPROVAL STATUS
+          if (currentUser && currentUser.role === 'TENANT') {
+            const { data: localeData } = await supabase
+              .from('locales')
+              .select('status')
+              .eq('owner_id', currentUser.id)
+              .single();
+
+            currentUser.isApproved = localeData?.status === 'approved';
+          } else {
+            currentUser!.isApproved = true; // Customers don't need approval
+          }
+
+          setUser(currentUser);
         }
       } else if (event === 'SIGNED_OUT') {
         setUser(null);
