@@ -19,6 +19,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Initial session check
     const checkSession = async () => {
       const currentUser = await authService.getCurrentUser();
       if (currentUser) {
@@ -27,6 +28,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     };
     checkSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = authService.onAuthStateChange(async (event, session) => {
+      console.log("Auth state change:", event);
+      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+        if (session?.user) {
+           // We need to map the session user to our User type.
+           // Ideally we reuse a mapping function, but for now we can fetch current user to ensure full metadata
+           const currentUser = await authService.getCurrentUser();
+           setUser(currentUser);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setUser(null);
+      }
+      setIsLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = async (email: string, password?: string) => {

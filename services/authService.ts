@@ -76,5 +76,10 @@ export const authService = {
             storeSlug: session.user.user_metadata.store_slug,
             businessType: session.user.user_metadata.business_type
         };
+    },
+
+    // Subscribe to auth changes
+    onAuthStateChange: (callback: (event: any, session: any) => void) => {
+        return supabase.auth.onAuthStateChange(callback);
     }
 };
